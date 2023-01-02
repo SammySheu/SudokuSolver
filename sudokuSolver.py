@@ -7,6 +7,7 @@ class Solution:
         rowHashSet = []
         colHashSet = []
         blockHashSet = []
+        emptyLocation = []
         for i in range(9):
             rowHashSet.append(set(arr))
             colHashSet.append(set(arr))
@@ -18,17 +19,19 @@ class Solution:
                     colHashSet[j].remove( int(board[i][j]) )
                     indexOfBlock = i // 3 * 3 + j // 3                    
                     blockHashSet[indexOfBlock].remove( int(board[i][j]) )
-
-        def dfs(r, c):
+                else: 
+                    emptyLocation.append(f'{i},{j}')
+        emptyLocation.append("9,9")
+        def dfs(toFill, r, c):
             # self.printBoard(board)
-            if r>=8 and c>=9:               # Depth search to the end and return True
+            if toFill == len(emptyLocation)-1:               # Depth search to the end and return True
                 return True
-            elif c>=9:                      # From the end of current row to the begin of next row
-                r+=1
-                c=0
-
-            if str(board[r][c])>='1' and str(board[r][c])<='9':
-                return dfs(r, c+1)          # if element has been filled, search next element
+            # elif c>=9:                      # From the end of current row to the begin of next row
+            #     r+=1
+            #     c=0
+            # print(emptyLocation)
+            # if str(board[r][c])>='1' and str(board[r][c])<='9':
+            #     return dfs(r, c+1)          # if element has been filled, search next element
             
             cross = rowHashSet[r].intersection( colHashSet[c] )
             indexOfBlock = r // 3 * 3 + c // 3                    
@@ -39,7 +42,9 @@ class Solution:
                 rowHashSet[r].remove(num)
                 colHashSet[c].remove(num)
                 blockHashSet[indexOfBlock].remove(num)
-                right = dfs(r, c+1)
+                # right = dfs(r, c+1)
+                
+                right = dfs(toFill+1, int(emptyLocation[toFill+1][0]), int(emptyLocation[toFill+1][2]))
                 if right :
                     return True
                 else:
@@ -48,7 +53,8 @@ class Solution:
                     colHashSet[c].add(num)
                     blockHashSet[indexOfBlock].add(num)
             return False
-        dfs(0,0)
+        toFill = 0
+        dfs(toFill, int(emptyLocation[toFill][0]), int(emptyLocation[toFill][2]))
         # self.printBoard(board)
 
     def printBoard(self, board):
