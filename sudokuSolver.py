@@ -5,8 +5,25 @@ import time
 class Solution:
     def solveSudoku(self, board: list[list[str]]) -> None:
         # print('\n\n\n\n\n\n\n\n\n\n\n\n\n')
+        # self.printBoard(board)
+        arr = [1,2,3,4,5,6,7,8,9]
+        rowHashSet = []
+        colHashSet = []
+        blockHashSet = []
+        for i in range(9):
+            rowHashSet.append(set(arr))
+            colHashSet.append(set(arr))
+            blockHashSet.append(set(arr))
+        for i in range(9):
+            for j in range(9):
+                if ord(board[i][j]) >= 49 and ord(board[i][j]) <= 57:
+                    rowHashSet[i].remove( int(board[i][j]) )
+                    colHashSet[j].remove( int(board[i][j]) )
+                    indexOfBlock = i // 3 * 3 + j // 3                    
+                    blockHashSet[indexOfBlock].remove( int(board[i][j]) )
+
         def dfs(r, c):
-            self.printBoard(board)
+            # self.printBoard(board)
             if r>=8 and c>=9:               # Depth search to the end and return True
                 return True
             elif c>=9:                      # From the end of current row to the begin of next row
@@ -16,17 +33,26 @@ class Solution:
             if str(board[r][c])>='1' and str(board[r][c])<='9':
                 return dfs(r, c+1)          # if element has been filled, search next element
             
-            for num in range(1,10):
-                if self.isSafe(board, r, c, num):
-                    board[r][c] = num
-                    right = dfs(r, c+1)
-                    if right :
-                        return True
-                    else:
-                        board[r][c] = '.'
+            cross = rowHashSet[r].intersection( colHashSet[c] )
+            indexOfBlock = r // 3 * 3 + c // 3                    
+            cross = blockHashSet[indexOfBlock].intersection(cross)
+            # print(cross)
+            for num in cross:
+                board[r][c] = num
+                rowHashSet[r].remove(num)
+                colHashSet[c].remove(num)
+                blockHashSet[indexOfBlock].remove(num)
+                right = dfs(r, c+1)
+                if right :
+                    return True
+                else:
+                    board[r][c] = '.'
+                    rowHashSet[r].add(num)
+                    colHashSet[c].add(num)
+                    blockHashSet[indexOfBlock].add(num)
             return False
         dfs(0,0)
-        self.printBoard(board)
+        # self.printBoard(board)
 
     def printBoard(self, board):
         lineUp = '\033[12A'
@@ -90,5 +116,10 @@ board = [
 [".",".","4",".","1",".",".",".","2"]
 ]
 
-
+import time
+start_time = time.time()
 Solution().solveSudoku(board)
+# main()
+print("--- %s seconds ---" % (time.time() - start_time))
+
+# if __name__ == '__main__':
