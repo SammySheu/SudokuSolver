@@ -1,7 +1,7 @@
+
 # Sudoku Solver
 
-###### tags: `Backtrack`, `DFS`, `Set`
-[ToC]
+###### tags: `Backtrack`, `DFS`, 
 
 ## **Backtrack vs DFS**
 
@@ -21,7 +21,7 @@
 - Backtrack當中，適用於**約束滿足類**的問題，且會列舉可能的解(build candidates to the problem)
 - Backtrack會進行**剪枝**的行為，當某些路線不可行時，進行捨棄（abandon candidates）
 
-在StackOverflow當中，也有人詢問這個問題，其中有一些回答值得思辨
+在StackOverflow當中，也有人詢問這個問題，其中有一些回答值得討論
 > For me, the difference between backtracking and DFS is that backtracking handles an **implicit** tree and DFS deals with an **explicit** one. This seems trivial, but it means a lot. When the search space of a problem is visited by backtracking, the implicit tree gets traversed and pruned in the middle of it. Yet for DFS, the tree/graph it deals with is explicitly constructed and unacceptable cases have already been thrown ~~i.e. pruned~~ away before any search is done.
 > **So, backtracking is DFS for implicit tree, while DFS is backtracking without pruning.**
 
@@ -41,16 +41,15 @@
 
 ---
 ### Method1
-:::info
-**Hint:** 窮舉所有的解，為最原始的暴力法
-:::
+`**Hint** 窮舉所有的解，為最原始的暴力法`
+
 在使用Backtrack Algorithm之前，可以藉由三個方向思考起
 - Base Cases（When to terminate）
 - Decisions（When to go further）
 - State（How to optimize）
 
 話不多說，直接範例解釋：
-```python=10
+```Python
 ********Base Cases********
 if r>=8 and c>=9:                         # 當呼叫到最後一列最後一行的右邊元素時，代表搜尋結束
     return True                   
@@ -58,7 +57,7 @@ elif c>=9:                                # 每一列的結尾，跳轉到下一
     r+=1
     c=0
 ```
-```python=16
+```Python
 ********Decisions********
 if str(board[r][c])>='1' and str(board[r][c])<='9':
     return dfs(r, c+1)                    # 如該元素已填好數字，往下一格前進
@@ -73,16 +72,14 @@ for num in range(1,10):                   # 由數字1開始窮舉，利用isSaf
             board[r][c] = '.'
 return False
 ```
-![](https://i.imgur.com/yPELyk7.gif =70%x)
+![GIF](https://i.imgur.com/yPELyk7.gif)
 
 ---
 ### Method2
+`**Hint** 優化Method1，將「填數字並判斷是否安全」這個動作，以HashSet完成`
 
-:::info
-**Hint:** 優化Method1，將「填數字並判斷是否安全」這個動作，以HashSet完成
-:::
 思想上，因為一個element需要查看所處的row, column, 以及block，因此在遞迴之前，先建立HashSet供查表，速度可以快上許多。HashSet數量為9(row)+9(column)+9(block) = 27 -> 分別用list儲存
-```python=
+```Python
 for i in range(9):                        # 建立List[Set(int)]
     rowHashSet.append(set(arr))
     colHashSet.append(set(arr))
@@ -96,7 +93,7 @@ for i in range(9):
             blockHashSet[indexOfBlock].remove( int(board[i][j]) )
 ```
 此時，也不需呼叫原本的isSafe()函數，因為HashSet機制已經確保該數字的安全性
-```python=
+```Python
 indexOfBlock = r // 3 * 3 + c // 3        # 利用 (A ∩ B) ∩ C 取得該元素可能的解
 cross = rowHashSet[r].intersection( colHashSet[c] )
 cross = blockHashSet[indexOfBlock].intersection(cross)
@@ -117,16 +114,15 @@ for num in cross:                         # 由交集的地方開始窮舉，並
         blockHashSet[indexOfBlock].add(num)
 return False
 ```
-![](https://i.imgur.com/7w1f2yr.gif =70%x)
+![GIF](https://i.imgur.com/7w1f2yr.gif)
 
 ---
 ### Method3
-:::info
-**Hint:** 既然在遞迴之前已經掃過整個board（建立HashSet），何不順便紀錄空格的位置？
-:::
+`**Hint** 既然在遞迴之前已經掃過整個board（建立HashSet），何不順便紀錄空格的位置？`
+
 原本Method1 & Method2的Decision making是填完數字之後，進入下一格(r, c+1)，現在Method3是「跳到下一個空格」，相形之下又少了更多的判斷時間。
 
-```python=16
+```Python
 for i in range(9):
     for j in range(9):
         if board[i][j] >= 49 and board[i][j] <= 57:
@@ -139,21 +135,21 @@ for i in range(9):
 ```
 
 因為已經用emptyLocation尋找空格，因此Base Cases可以稍加更改。使用變數'toFill'計算空格被完成了多少，當toFill到達emptyLocation的最末端時，回傳True
-```python=
+```Python
 ********Base Cases********
 if toFill == len(emptyLocation)-1:
     return True
 ```
 Decision Making中，原本呼叫下一格元素(r,c+1)，變成呼叫下一個空格的所在位置（下一個“空格”即為emptyLocation的下一個元素）
-```python=
+```Python
 ********Decisions********
 right = dfs(toFill+1, int(emptyLocation[toFill+1][0]), int(emptyLocation[toFill+1][2]))
 ```
 
 ## Conclusion
 
-三個Method之中，time complexity皆為${\rm{O}(9^{81})}$，但因為Method2 & Method3皆有適度的優化，速度會比Method1快上許多
-```shell=
+三個Method之中，time complexity皆為 ${\rm{O}(9^{81})}$，但因為Method2 & Method3皆有適度的優化，速度會比Method1快上許多
+```Shell
 ********EasyProblem********
 Method1 --- 0.007818937301635742 seconds ---
 Method2 --- 0.000294923782348632 seconds ---
